@@ -1,6 +1,9 @@
 const express = require('express');
 const expresslayouts = require('express-ejs-layouts');
 const mongoose = require('mongoose');
+const flash = require('connect-flash');
+const session = require('express-session');
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -19,6 +22,25 @@ app.set('view engine', 'ejs');
 
 // BodyParser
 app.use(express.urlencoded({ extended: false }));
+
+// Express Session middleware
+app.use(
+  session({
+    secret: 'ourlittlesecret',
+    resave: false,
+    saveUninitialized: true,
+  })
+);
+
+//  connect flash
+app.use(flash());
+
+// Global var for flash msg - custom middleware. dipakai utk kirim flash message sesuai state saat sebelum redirect dilakukan, liat route user register.login ketika mid ini dipanggil
+app.use((req, res, next) => {
+  res.locals.success_msg = req.flash('success_msg');
+  res.locals.error_msg = req.flash('error_msg');
+  next();
+});
 
 // Routes
 app.use('/', require('./routes/index'));
